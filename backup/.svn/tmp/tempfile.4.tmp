@@ -1,0 +1,10 @@
+#ifndef HANDLERS_H
+#define HANDLERS_H
+
+#define KEY_BUFFER_PORT		0x60
+#define KEY_INTERRUPT_PORT  0x64
+
+extern void keyboard_handler();
+extern void rtc_handler();
+
+#endif /* HANDLERS_H */

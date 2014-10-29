@@ -1,0 +1,191 @@
+// exception handler declarations
+
+#include "exceptions.h"
+#include "lib.h"
+
+
+void divide_error() {
+	clear();
+	printf("divide error exception\n");
+	while(1);
+}
+
+void reserved() {
+	clear();
+	printf("reserved\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void nmi_interrupt() {
+	clear();
+	printf("NMI interrupt\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void breakpoint() {
+	clear();
+	printf("breakpoint\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void overflow() {
+	clear();
+	printf("overflow\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void bound_range_exceeded() {
+	clear();
+	printf("bound range exceeded\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void invalid_opcode() {
+	clear();
+	printf("invalid opcode\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void device_not_available() {
+	clear();
+	printf("device not available\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void double_fault() {
+	clear();
+	printf("double fault\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void coprocessor_segment_overrun() {
+	clear();
+	printf("coprocessor segment overrun\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void invalid_tss() {
+	clear();
+	printf("invalid tss\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void segment_not_present() {
+	clear();
+	printf("segement not present\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void stack_segment_fault() {
+	clear();
+	printf("stack segment fault\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void general_protection() {
+	clear();
+	printf("general protection\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void page_fault() {
+	clear();
+	printf("page fault\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void math_fault() {
+	clear();
+	printf("x87 FPU floating-point error (math fault)\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void alignment_check() {
+	clear();
+	printf("alignment check\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void machine_check() {
+	clear();
+	printf("machine check\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}
+
+void simd_floating_exception() {
+	clear();
+	printf("SIMD floating-point exception\n");
+<<<<<<< .mine
+	while(1);
+=======
+	while(1) {}
+>>>>>>> .r13947
+}

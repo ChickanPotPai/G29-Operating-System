@@ -1,0 +1,335 @@
+// keyboard related declarations
+
+#include "lib.h"
+#include "i8259.h"
+#include "keyboard.h"
+
+#define MODIFY_KEY  0xE0
+#define REL_MASK 	0x7F
+
+#define CAPS_LOCK	0x3A
+#define CTRL		0x1D
+#define LEFT_SHIFT	0x2A
+#define RIGHT_SHIFT	0x36
+
+#define BACKSPACE 	0x0E
+#define ENTER 		0x1C
+#define SPACE 		0x39
+
+#define L 			0x26
+
+#define START_X		0
+#define START_Y		0
+
+static uint8_t shift_pressed = 0;
+static uint8_t ctrl_pressed = 0;
+static uint8_t caps_activated = 0;
+
+unsigned char lowercase_char[64] = {
+	0, 0, 
+	'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 
+	0, 0, 
+	'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p','[', ']', 
+	0, 0,  
+	'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';','\'', '`', 
+	0, 
+	'\\',	
+	'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/',
+<<<<<<< .mine
+	0, 0, 0,
+	' ',
+	0
+=======
+	0, 0, 0,
+	' ',
+	0, 0, 0, 0, 0, 0
+>>>>>>> .r15435
+};
+
+unsigned char uppercase_char[64] = {
+	0, 0, 
+	'!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 
+	0, 0, 
+	'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P','{', '}', 
+	0, 0,  
+	'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':','\"', '~', 
+	0, 
+	'|',	
+	'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?',
+	0, 0, 0,
+	' ',
+	0, 0, 0, 0, 0, 0
+};
+
+unsigned char caps_char[64] = {
+	0, 0, 
+	'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=',  
+	0, 0, 
+	'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P','[', ']', 
+	0, 0,  
+	'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';','\'', '`',  
+	0, 
+	'\\',	
+	'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/',
+	0, 0, 0,
+	' ',
+	0, 0, 0, 0, 0, 0
+};
+
+void keyboard_handler() {
+	unsigned char code[2];
+	unsigned char release_code[2];
+	unsigned char release_key;
+
+	disable_irq(KEYBOARD_IRQ);
+
+	int i;
+	for (i = 0; i < 2; i++) {
+		code[i] = inb(KEY_BUFFER_PORT);
+		release_code[i] = code[i] | KEY_RELEASED_MASK;
+	}
+	
+	if (code[0] == MODIFY_KEY) {
+		code[0] = code[1];
+	}
+
+	if (code[0] != MODIFY_KEY) {
+		position_t current_position = get_cur_position();
+
+		if (code[0] == LEFT_SHIFT || code[0] == RIGHT_SHIFT) {
+			shift_pressed = 1;
+<<<<<<< .mine
+=======
+		} else if (code[0] == release_code[0]) {
+			shift_pressed = 0;
+>>>>>>> .r15435
+		} else if (code[0] == CTRL) {
+			ctrl_pressed = 1;
+		} else if (code[0] == release_code[0]) {
+			release_key = code & REL_MASK;
+
+			if ((release_key == LEFT_SHIFT) | (release_key == RIGHT_SHIFT)) {
+				shift_pressed = 0;
+			} else if (release_key == CTRL) {
+				ctrl_pressed = 0;
+			}
+		} else if (code[0] == CAPS_LOCK && caps_activated == 0) {
+			caps_activated = 1;
+		} else if (code[0] == CAPS_LOCK && caps_activated == 1){
+			caps_activated = 0;
+		} else if (code[0] <= SPACE) {
+			if (cur_buffer_size == 0) {
+				start_position = current_position;
+			}
+
+			if (!shift_pressed && !caps_activated) {
+				if (code[0] == BACKSPACE) {
+					do_backspace();
+				} else if (code[0] == ENTER) {
+					do_enter();
+				} else if (!ctrl_pressed && (cur_buffer_size < LINE_BUFFER - 2)) {
+					if (lowercase_char[code[0]] != 0) {
+						uint32_t i;
+						for (i = cur_buffer_size; i > cur_buffer_position; i--) {
+							key_line_buffer[i] = key_line_buffer[i - 1];
+						}
+
+						key_line_buffer[cur_buffer_position] = lowercase_char[code[0]];
+						cur_buffer_position++;
+						cur_buffer_size++;
+
+						print_line_buffer();
+
+						if (current_position.x_coord + 1 < NUM_COLS) {
+							set_new_position(current_position.x_coord + 1, current_position.y_coord);
+						} else {
+							set_new_position(0, current_position.y_coord + 1);
+						}
+					}
+				} else {
+					if (ctrl_pressed && code[0] == L) {
+<<<<<<< .mine
+						clear();
+						clear_buffer();
+						set_new_position(START_X, START_Y);
+=======
+						position_t cur_position = get_cur_position();
+						set_new_position(cur_position.x_coord, 0);
+						start_position.y_coord = 0;
+
+						int i;
+						for (i = 0; i < current_position.y_coord; i++) {
+							scrollscreen();
+						}
+					}
+				}
+			} else if (caps_activated) {
+				if (cur_buffer_size < LINE_BUFFER - 2) {
+					if (caps_char[code[0]] != 0) {
+						int i;
+						for (i = cur_buffer_size; i > cur_buffer_position; i--) {
+							key_line_buffer[i] = key_line_buffer[i - 1];
+						}
+
+>>>>>>> .r15435
+						key_line_buffer[cur_buffer_position] = caps_char[code[0]];
+						cur_buffer_position++;
+						cur_buffer_size++;
+
+						print_line_buffer();
+
+						if (current_position.x_coord + 1 < NUM_COLS) {
+							set_new_position(current_position.x_coord + 1, current_position.y_coord);
+						} else {
+							set_new_position(0, current_position.y_coord + 1);
+						}
+					}
+				}
+			} else {
+				if (cur_buffer_size < LINE_BUFFER - 2) {
+					if (uppercase_char[code[0]] != 0) {
+						int i;
+						for (i = cur_buffer_size; i > cur_buffer_position; i--) {
+							key_line_buffer[i] = key_line_buffer[i - 1];
+						}
+
+						key_line_buffer[cur_buffer_position] = uppercase_char[code[0]];
+						cur_buffer_position++;
+						cur_buffer_size++;
+
+						print_line_buffer();
+
+						if (current_position.x_coord + 1 < NUM_COLS) {
+							set_new_position(current_position.x_coord + 1, current_position.y_coord);
+						} else {
+							set_new_position(0, current_position.y_coord + 1);
+						}
+					}
+				}
+			}
+		}
+	}	
+	
+    send_eoi(KEYBOARD_IRQ);
+    enable_irq(KEYBOARD_IRQ);
+}
+
+void do_enter() {
+	key_line_buffer[cur_buffer_size] = '\n';
+
+	print_line_buffer();
+	position_t cur_position = get_cur_position();
+
+	int i = cur_buffer_size - 1;
+
+	while (key_line_buffer[i] == ' ' && i >= 0) {
+		key_line_buffer[i] = 0;
+		i--;
+	}
+
+	start_position = cur_position;
+
+	strncpy(key_read_buffer, key_line_buffer, LINE_BUFFER);
+
+	clear_buffer();
+
+	keyboard_read = 1;
+}
+
+void do_backspace() {
+	if (cur_buffer_position > 0) {
+		position_t prev_position = get_cur_position();
+
+		cur_buffer_position--;
+		cur_buffer_size--;
+
+		int i;
+		for (i = cur_buffer_position; i <= cur_buffer_size + 1; i++) {
+			key_line_buffer[i] = key_line_buffer[i + 1];
+		}
+
+		print_line_buffer();
+		putc(' ');
+
+		if (prev_position.x_coord > 0) {
+			set_new_position(prev_position.x_coord - 1, prev_position.y_coord);
+		} else {
+			set_new_position(NUM_COLS - 1, prev_position.y_coord - 1);
+		}
+	}
+}
+
+void print_line_buffer() {
+	set_new_position(start_position.x_coord, start_position.y_coord);
+	wrap_string(key_line_buffer);
+}
+
+void clear_buffer() {
+	int i;
+
+	for (i = 0; i < LINE_BUFFER; i++) {
+		key_line_buffer[i] = 0;
+	}
+
+	cur_buffer_position = 0;
+	cur_buffer_size = 0;
+}
+
+int32_t read_keyboard(int32_t fd, char* buf, int32_t nbytes) {
+	int32_t bytes_received = 0;
+
+	sti();
+	cli();
+
+	while(keyboard_read == 0) {
+		cli();
+		sti();
+	}
+
+	cli();
+
+	int32_t i = 0;
+
+	while (key_read_buffer[i] != 0 && i < nbytes) {
+		buf[i] = key_read_buffer[i];
+		bytes_received++;
+		i++;
+	}
+
+	keyboard_read = 0;
+
+	return bytes_received;
+}
+
+int32_t write_keyboard(int32_t fd, const char* buf, int32_t nbytes) {
+	int32_t bytes_received = 0;
+	unsigned char buffer_char;
+	position_t *key_start = &start_position;
+
+	int i;
+	for (i = 0; i < nbytes; i++) {
+		buffer_char = buf[i];
+
+		if(buffer_char != 0) {
+			putc(buffer_char);
+
+			key_start->x_coord += 1;
+
+			if (key_start->x_coord == NUM_COLS || buffer_char == '\n') {
+				key_start->x_coord = 0;
+				key_start->y_coord += 1;
+
+				if (key_start->y_coord >= NUM_ROWS) {
+					key_start->y_coord = NUM_ROWS - 1;
+				}
+			}
+
+			bytes_received++;
+		} else {
+			break;
+		}
+	}
+
+	move_cursor();
+	return bytes_received;
+}

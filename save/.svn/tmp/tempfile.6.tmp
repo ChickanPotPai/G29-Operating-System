@@ -1,0 +1,204 @@
+#include "fs.h"
+
+#define BLOCK 4096
+#define BOOT_ENTRY_SIZE 64
+#define BLOCK_SIZE 4
+
+int32_t fs_open(const uint8_t* filename, pcb_t* curr_pcb)
+{	
+<<<<<<< .mine
+	return i;
+=======
+	pcb = curr_pcb;
+	return 0;
+>>>>>>> .r18909
+}
+
+int32_t fs_write(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length)
+{
+	return -1;
+}
+
+int32_t fs_close(int32_t fd, pcb_t* curr_pcb)
+{
+	curr_pcb->file_array[fd].fops_ptr = NULL;
+	curr_pcb->file_array[fd].inode_ptr = NULL;
+	curr_pcb->file_array[fd].file_position = 0;
+	curr_pcb->file_array[fd].flags = 0;
+
+	return 0;
+}
+
+
+int32_t fs_read_name(uint8_t* fname, uint8_t* buf, int32_t nbytes) {
+	dentry_t curr_dentry;
+
+	if (read_dentry_by_name(fname, &curr_dentry) == -1) {
+		return -1;
+	}
+
+	if (curr_dentry.type == 1) {
+		return read_dir(NULL, buf);
+	} else if (curr_dentry.type == 2) {
+		return read_data(curr_dentry.inode, 0, buf, nbytes);
+	}
+
+	return 0;
+}
+
+int32_t fs_read(uint32_t fd, uint8_t* buf, int32_t nbytes) {
+	uint32_t inode_num;
+	uint32_t check;
+
+	pcb_t* pcb = get_curr_pcb();
+	fd_t* fd_ptr = (fd_t*) &(pcb->file_array[fd]);
+
+
+	if (fd_ptr->inode_ptr == NULL) {
+		return read_dir(fd_ptr, buf);
+	}
+
+	if (fd_ptr->file_position >= fd_ptr->inode_ptr->length) {return 0;}
+	
+	inode_num = ((uint32_t) (fd_ptr->inode_ptr) - (uint32_t) boot) / BLOCK - 1;
+
+	check = read_data(inode_num, fd_ptr->file_position, buf, nbytes);
+	if (check == -1)
+	{
+	 	return 0;
+	} 
+
+	fd_ptr->file_position += check;
+	/*
+	if (nbytes != 0 && check == 0) {fd_ptr->file_position = 0;} 
+	else {fd_ptr->file_position += check;} */
+
+	return check;
+}
+
+
+int32_t read_dir(fd_t* fd, uint8_t* buf) {
+	if (fd->file_position >= boot->num_directory_entry) {
+		int i;
+
+		for (i = 0; i < NAME_SIZE; i++) {
+			buf[i] = 0;
+		}
+
+		return 0;
+	}
+
+	dentry_t curr_dentry;
+
+	if (read_dentry_by_index(fd->file_position, &curr_dentry) == 0) {
+		strncpy((int8_t*) buf, (int8_t*)curr_dentry.name, NAME_SIZE);
+		int name_length = strlen((int8_t*)curr_dentry.name);
+		fd->file_position++;
+		return name_length;
+	} else {
+		return 0;
+	}
+}
+
+
+int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length)
+{
+	int i;
+	int block_count;
+	int byte_count;
+	uint8_t* buf_start = buf;
+	uint32_t file_length;
+	inode_t* inode_ptr;
+	inode_t* inodes;
+	uint32_t length_left;
+	uint8_t* off_ptr;
+
+	inodes = (inode_t*) (boot);
+	inode_ptr = &(inodes[inode + 1]);
+
+	length_left = inode_ptr->length - offset;
+
+	// if (length_left <= 0)
+	// 	return 0;
+
+	//if (offset >= length) {return 0;}	
+
+	if (inode_ptr->length > KB4 * INODE_BLOCKS)
+	{
+		return -1;
+	}
+
+	file_length = inode_ptr->length;
+
+	if ((offset + length) > file_length) {
+		length = file_length;
+	}
+
+	block_count = length / KB4;
+	byte_count = length % KB4;
+
+	for (i = 0; i < block_count; i++) {
+		if (inode_ptr->blocks[i] >= boot->num_data_block)
+		{
+			return -1;
+		}
+		memcpy(buf_start, &data[inode_ptr->blocks[i]], KB4);
+		buf_start += KB4;
+	}
+
+	if (byte_count > 0) {
+		off_ptr = (uint8_t*) &data[inode_ptr->blocks[block_count]] + (offset % 4096);
+		memcpy(buf_start, off_ptr, byte_count);
+	}
+
+	return length;
+}
+
+int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
+	int i;
+
+	for (i = 0; i < DIRECTORY_ENTRIES; i++) {
+		if (strncmp((int8_t*) (boot->directory_entry[i].name), (int8_t*) (fname), NAME_SIZE - 1) == 0) {
+			*dentry = boot->directory_entry[i];
+
+			strcpy((int8_t*)(dentry->name), (int8_t*) (boot->directory_entry[i].name));
+			dentry->type = boot->directory_entry[i].type;
+			dentry->inode = boot->directory_entry[i].inode;
+			strcpy((int8_t*)(dentry->reserved), (int8_t*) (boot->directory_entry[i].reserved));
+			
+			return 0;
+		}
+	}
+
+	return -1;
+}
+
+int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry)
+{
+	int inodes;
+	inodes = boot->num_inodes;
+
+	if (index >= inodes)
+	{
+		return -1;
+	}
+
+	*dentry = boot->directory_entry[index];
+
+	strcpy((int8_t*)(dentry->name), (int8_t*) (boot->directory_entry[index].name));
+	dentry->type = boot->directory_entry[index].type;
+	dentry->inode = boot->directory_entry[index].inode;
+	strcpy((int8_t*)(dentry->reserved), (int8_t*) (boot->directory_entry[index].reserved));
+
+	return 0;
+}
+
+void setup_fs(uint32_t boot_ptr)
+{
+	int inodes;
+	boot = (boot_block_t*)boot_ptr;
+
+	inodes = boot->num_inodes;
+
+	data = (data_block_t*) (boot_ptr + BLOCK + inodes * BLOCK); // start, plus boot block, plus however many inodes, to get to data
+}

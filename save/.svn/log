@@ -1,0 +1,13 @@
+<modify-entry
+   committed-rev="19146"
+   committed-date="2014-05-04T05:36:13.922631Z"
+   name="mp3.img"
+   checksum="d4b3dc9cb62656f0bef0732c93fc4e2c"
+   last-author="ehu6"/>
+<committed
+   name="mp3.img"
+   revision="19146"/>
+<modify-wcprop
+   name="mp3.img"
+   propname="svn:wc:ra_dav:version-url"
+   propval="/svn/sp14-ece391/!svn/ver/19146/_projects/group29/student-distrib/mp3.img"/>

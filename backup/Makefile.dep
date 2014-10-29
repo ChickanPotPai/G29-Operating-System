@@ -1,0 +1,12 @@
+boot.o: boot.S multiboot.h x86_desc.h types.h
+wrappers.o: wrappers.S
+x86_desc.o: x86_desc.S x86_desc.h types.h
+exceptions.o: exceptions.c exceptions.h lib.h types.h
+fs.o: fs.c fs.h types.h
+i8259.o: i8259.c i8259.h types.h lib.h
+kernel.o: kernel.c multiboot.h types.h x86_desc.h lib.h i8259.h debug.h \
+  rtc.h exceptions.h keyboard.h paging.h
+keyboard.o: keyboard.c lib.h types.h i8259.h keyboard.h
+lib.o: lib.c lib.h types.h
+paging.o: paging.c paging.h types.h x86_desc.h
+rtc.o: rtc.c lib.h types.h rtc.h i8259.h

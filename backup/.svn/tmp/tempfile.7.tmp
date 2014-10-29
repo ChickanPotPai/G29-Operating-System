@@ -1,0 +1,48 @@
+// interrupt handler declarations
+
+#include "lib.h"
+#include "handlers.h"
+#include "i8259.h"
+
+
+unsigned char key_layout[128] = {
+	0,  27, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=',
+	'\b',	// backspace
+	'\t',	// tab
+	'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p','[', ']',
+	'\n',	// enter
+	0, 
+	'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';','\'', '`',
+	0,
+	'\\', 'z', 'x', 'c', 'v', 'b', 'n',
+	'm', ',', '.', '/',
+	0
+};
+
+void keyboard_handler() {
+	cli();
+	unsigned char code;
+	//unsigned char kbd_input;
+	
+	disable_irq(1);
+
+	while(!(inb(0x64) & 0x01));
+	code = inb(KEY_BUFFER_PORT);
+	//kbd_input = inb(KEY_BUFFER_PORT + 4);
+
+<<<<<<< .mine
+	printf("%c", key_layout[code]);
+=======
+    printf("%c", key_layout[code]);
+>>>>>>> .r13947
+
+   	//outb(kbd_input|0x80, KEY_BUFFER_PORT + 4);
+   	//outb(kbd_input, KEY_BUFFER_PORT + 4);
+
+    send_eoi(1);
+<<<<<<< .mine
+    enable_irq(1);
+=======
+ 	sti();
+>>>>>>> .r13947
+}

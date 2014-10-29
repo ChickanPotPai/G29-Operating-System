@@ -1,0 +1,39 @@
+#ifndef TASKS_H
+#define TASKS_H
+
+#include "types.h"
+#include "terminal.h"
+#include "paging.h"
+
+#define MAX_FD			8
+#define FD_BEGIN		2	
+
+typedef int32_t(*open_func_ptr)(const void*, void*);
+typedef int32_t(*close_func_ptr)(int32_t, void*);
+typedef int32_t(*read_func_ptr)(int32_t, void*, int32_t);
+typedef int32_t(*write_func_ptr)(int32_t, const void*, int32_t);
+
+typedef struct file_ops_table {
+	open_func_ptr open_ptr;
+	close_func_ptr close_ptr;
+	read_func_ptr read_ptr;
+	write_func_ptr write_ptr;
+} file_ops_t;
+
+typedef struct file_descriptor {
+	file_ops_t* fops_ptr;
+	inode_t* inode_ptr;
+	uint32_t file_position;	
+	uint32_t flags;
+} fd_t;
+
+typedef struct pcb_t {
+	int32_t pid;
+	char args[LINE_BUFFER]; 
+	fd_t file_array[MAX_FD];
+
+	int32_t physical_addr;
+	int32_t parent_ptr;
+} pcb_t;
+
+#endif /* TASKS_H */
